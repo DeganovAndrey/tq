@@ -1,0 +1,14 @@
+import type { User } from "../type";
+import apiClient from "./axios";
+
+export const getUsers = () => apiClient.get<User[]>("/users");
+export const getUser = (id: number) => apiClient.get(`/users/${id}`);
+export const createUser = (data: User) => apiClient.post("/users/", data);
+export const updateUser = (id: number, data: User) =>
+  apiClient.put(`/users/${id}`, data);
+export const deleteUser = (id: number) => apiClient.delete(`/users/${id}`);
+
+export const searchUsers = async (query: string): Promise<User[]> => {
+  const { data } = await apiClient.get<User[]>("/users");
+  return data.filter((user) => user.name.toLowerCase().includes(query.toLowerCase()));
+};
