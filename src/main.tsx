@@ -1,10 +1,28 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import App from "./App.tsx";
 import "./index.css";
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      console.error(
+        `You have error in query with key - [${query.queryKey}]`,
+        error.message,
+      );
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error) => {
+      console.error(`You have error in mutation:`, error.message);
+    },
+  }),
   defaultOptions: {
     queries: {
       staleTime: 3000,

@@ -9,7 +9,10 @@ export const useCreateUser = () => {
     onMutate: async (newUser: Pick<User, "name" | "email" | "phone">) => {
       await queryClient.cancelQueries({ queryKey: ["users"] });
       const previousData = queryClient.getQueryData(["users"]);
-      queryClient.setQueryData(["users"], (old: User[]) => [newUser, ...old]);
+      queryClient.setQueryData(["users"], (old: User[] = []) => [
+        ...old,
+        newUser,
+      ]);
       return { previousData };
     },
     onError: (_err, _user, context) => {
