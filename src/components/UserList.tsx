@@ -3,6 +3,8 @@ import UserDetail from "./UserDetail";
 import { useDeleteUser } from "../hooks/useDeleteUser";
 import SearchBar from "./SearchBar";
 import { useInfiniteUsers } from "../hooks/useInfiniteUsers";
+import { useQueryClient } from "@tanstack/react-query";
+import { getUser } from "../api/users.api";
 
 const UserList = () => {
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
@@ -17,6 +19,16 @@ const UserList = () => {
   } = useInfiniteUsers(3);
 
   const allPages = data?.pages.flatMap((page) => page) ?? [];
+
+  const queryClient = useQueryClient();
+
+  const handlePrefetch = (id: number) => {
+    return queryClient.prefetchQuery({
+      queryKey: ["user", id],
+      queryFn: () => getUser(id),
+      staleTime: 10 * 1000,
+    });
+  };
 
   console.log(data);
 
@@ -40,20 +52,24 @@ const UserList = () => {
             key={user.id}
             style={{ border: "1px solid", margin: "3px", borderRadius: "10px" }}
           >
-            <p> name: {user.name}</p>
-            <p>email: {user.email}</p>
-            <p>city: {user.address.city}</p>
-            <div style={{ display: "flex", justifyContent: "space-around" }}>
-              <button onClick={() => setSelectedUser(user.id)}>details</button>
-              <button
-                disabled={isDeleting}
-                onClick={() => deleteUser(user.id)}
-                style={{ color: "red" }}
-              >
-                {isDeleting ? "Deleting" : "delete"}
-              </button>
+            <div onMouseEnter={() => handlePrefetch(user.id)}>
+              <p> name: {user.name}</p>
+              <p>email: {user.email}</p>
+              <p>city: {user.address.city}</p>
+              <div style={{ display: "flex", justifyContent: "space-around" }}>
+                <button onClick={() => setSelectedUser(user.id)}>
+                  details
+                </button>
+                <button
+                  disabled={isDeleting}
+                  onClick={() => deleteUser(user.id)}
+                  style={{ color: "red" }}
+                >
+                  {isDeleting ? "Deleting" : "delete"}
+                </button>
+              </div>
+              {deleteError && <p style={{ color: "red" }}>Delete failed</p>}
             </div>
-            {deleteError && <p style={{ color: "red" }}>Delete failed</p>}
           </li>
         ))}
       </ul>
