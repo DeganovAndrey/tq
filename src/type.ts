@@ -21,3 +21,23 @@ export type User = {
     bs: string;
   };
 };
+
+export type Post = {
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+};
+export type Album = {
+  userId: number;
+  id: number;
+  title: string;
+};
+
+export type Comment = {
+  postId: number;
+  id: number;
+  name: string;
+  email: string;
+  body: string;
+};

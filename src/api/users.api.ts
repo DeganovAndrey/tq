@@ -19,3 +19,8 @@ export const getPages = (page: number, limit = 3) =>
   apiClient
     .get(`/users?_page=${page + 1}&_limit=${limit}`)
     .then((res) => res.data);
+
+export const getPosts = (id: number) => apiClient.get(`/users/${id}/posts`);
+export const getAlbums = (id: number) => apiClient.get(`/users/${id}/albums`);
+export const getComments = (postId: number) =>
+  apiClient.get(`/posts/${postId}/comments`);

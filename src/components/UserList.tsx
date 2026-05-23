@@ -4,7 +4,7 @@ import { useDeleteUser } from "../hooks/useDeleteUser";
 import SearchBar from "./SearchBar";
 import { useInfiniteUsers } from "../hooks/useInfiniteUsers";
 import { useQueryClient } from "@tanstack/react-query";
-import { getUser } from "../api/users.api";
+import { fetchUserData } from "../hooks/useUser";
 
 const UserList = () => {
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
@@ -25,12 +25,10 @@ const UserList = () => {
   const handlePrefetch = (id: number) => {
     return queryClient.prefetchQuery({
       queryKey: ["user", id],
-      queryFn: () => getUser(id),
+      queryFn: () => fetchUserData(id),
       staleTime: 10 * 1000,
     });
   };
-
-  console.log(data);
 
   const {
     mutate: deleteUser,
