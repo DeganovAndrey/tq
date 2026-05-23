@@ -6,10 +6,10 @@ const CreateUserForm = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
-  const { mutate, isPending, isError, isSuccess } = useCreateUser();
-
+  const { mutate, isPending, isError, isSuccess, error } = useCreateUser();
   if (isPending) return <p>Now creating user, wait please </p>;
-  if (isError) return <p>Oops, something wrong bad</p>;
+  if (isError && error)
+    return <p>Oops, something wrong bad {error?.message}</p>;
   if (isSuccess) return <p>Created new user with useCreateUser</p>;
 
   const handleSubmit = (e: React.ChangeEvent) => {
