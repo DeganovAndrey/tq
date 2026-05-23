@@ -1,18 +1,24 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import UserDetail from "./UserDetail";
 import { useDeleteUser } from "../hooks/useDeleteUser";
 import SearchBar from "./SearchBar";
-import { useQueryClient } from "@tanstack/react-query";
-import { getPages } from "../api/users.api";
-import { usePagination } from "../hooks/usePagination";
+import { useInfiniteUsers } from "../hooks/useInfiniteUsers";
 
 const UserList = () => {
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
-  const [page, setPage] = useState(0);
 
-  const { data: users, isLoading, error, isError } = usePagination(page);
-  console.log(users);
-  const queryClient = useQueryClient();
+  const {
+    data,
+    error,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteUsers(3);
+
+  const allPages = data?.pages.flatMap((page) => page) ?? [];
+
+  console.log(data);
 
   const {
     mutate: deleteUser,
@@ -20,24 +26,7 @@ const UserList = () => {
     isError: deleteError,
   } = useDeleteUser();
 
-  useEffect(() => {
-    if (users && users.length > 0) {
-      queryClient.prefetchQuery({
-        queryKey: ["users", page + 1],
-        queryFn: () => getPages(page + 1, 3),
-      });
-    }
-  }, [page, users, queryClient]);
-
-  const nextPage = () => setPage((prev) => prev + 1);
-  const previousPage = () => setPage((prev) => prev - 1);
-
-  const lastDisabled = page === 0;
-  const nextDisabled = users && users.length < 3;
-
   if (isLoading) return <div>Loading...</div>;
-
-  if (isError) return <h3>{error.message}</h3>;
 
   if (error) return <h3>{error.message}</h3>;
 
@@ -46,7 +35,7 @@ const UserList = () => {
       <SearchBar />
       {selectedUser && <UserDetail id={selectedUser} />}
       <ul style={{ listStyle: "none" }}>
-        {users?.map((user) => (
+        {allPages?.map((user) => (
           <li
             key={user.id}
             style={{ border: "1px solid", margin: "3px", borderRadius: "10px" }}
@@ -69,12 +58,11 @@ const UserList = () => {
         ))}
       </ul>
       <div>
-        <button disabled={lastDisabled} onClick={previousPage}>
-          Предыдущая
-        </button>
-        <button disabled={nextDisabled} onClick={nextPage}>
-          Следующая
-        </button>
+        {hasNextPage && (
+          <button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+            {isFetchingNextPage ? "Загрузка..." : "Загрузить еще"}
+          </button>
+        )}
       </div>
     </div>
   );
