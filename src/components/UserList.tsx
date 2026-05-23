@@ -1,19 +1,39 @@
-import { useState } from "react";
-import { useUsers } from "../hooks/useUsers";
+import { useEffect, useState } from "react";
 import UserDetail from "./UserDetail";
 import { useDeleteUser } from "../hooks/useDeleteUser";
 import SearchBar from "./SearchBar";
+import { useQueryClient } from "@tanstack/react-query";
+import { getPages } from "../api/users.api";
+import { usePagination } from "../hooks/usePagination";
 
 const UserList = () => {
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
-  const { data: users, isLoading, error, isError } = useUsers();
+  const [page, setPage] = useState(0);
+
+  const { data: users, isLoading, error, isError } = usePagination(page);
   console.log(users);
+  const queryClient = useQueryClient();
 
   const {
     mutate: deleteUser,
     isPending: isDeleting,
     isError: deleteError,
   } = useDeleteUser();
+
+  useEffect(() => {
+    if (users && users.length > 0) {
+      queryClient.prefetchQuery({
+        queryKey: ["users", page + 1],
+        queryFn: () => getPages(page + 1, 3),
+      });
+    }
+  }, [page, users, queryClient]);
+
+  const nextPage = () => setPage((prev) => prev + 1);
+  const previousPage = () => setPage((prev) => prev - 1);
+
+  const lastDisabled = page === 0;
+  const nextDisabled = users && users.length < 3;
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -48,6 +68,14 @@ const UserList = () => {
           </li>
         ))}
       </ul>
+      <div>
+        <button disabled={lastDisabled} onClick={previousPage}>
+          Предыдущая
+        </button>
+        <button disabled={nextDisabled} onClick={nextPage}>
+          Следующая
+        </button>
+      </div>
     </div>
   );
 };

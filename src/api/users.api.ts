@@ -10,5 +10,12 @@ export const deleteUser = (id: number) => apiClient.delete(`/users/${id}`);
 
 export const searchUsers = async (query: string): Promise<User[]> => {
   const { data } = await apiClient.get<User[]>("/users");
-  return data.filter((user) => user.name.toLowerCase().includes(query.toLowerCase()));
+  return data.filter((user) =>
+    user.name.toLowerCase().includes(query.toLowerCase()),
+  );
 };
+
+export const getPages = (page: number, limit = 3) =>
+  apiClient
+    .get(`/users?_page=${page + 1}&_limit=${limit}`)
+    .then((res) => res.data);
